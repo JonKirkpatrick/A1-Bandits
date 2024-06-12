@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>k_armed_bandits &mdash; PythonBandits 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PythonBandits
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../k_armed_bandits.html">k_armed_bandits module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../non_stationary.html">non_stationary module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PythonBandits</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">k_armed_bandits</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for k_armed_bandits</h1><div class="highlight"><pre>
+<span></span><span class="c1"># bandit_module.py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">non_stationary</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="NormalBandit">
+<a class="viewcode-back" href="../k_armed_bandits.html#k_armed_bandits.NormalBandit">[docs]</a>
+<span class="k">class</span> <span class="nc">NormalBandit</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class to represent an individual bandit with a normal reward distribution.</span>
+
+<span class="sd">    ...</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mean : float</span>
+<span class="sd">        the average reward to be expected from this bandit</span>
+<span class="sd">    variance : float</span>
+<span class="sd">        the variance associated with the normal reward distribution</span>
+<span class="sd">    verbose : boolean</span>
+<span class="sd">        optional parameter used to provide greater detail to stdout</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    pull():</span>
+<span class="sd">        outputs a randomly generated reward based on the bandit&#39;s distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">means</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs all the necessary attributes for the NormalBandit object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            mean : float</span>
+<span class="sd">                the average reward to be expected from this bandit</span>
+<span class="sd">            variance : float</span>
+<span class="sd">                the variance associated with the normal reward distribution</span>
+<span class="sd">            verbose : boolean</span>
+<span class="sd">                optional parameter used to provide greater detail to stdout</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">means</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variance</span> <span class="o">=</span> <span class="n">variance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+<div class="viewcode-block" id="NormalBandit.pull">
+<a class="viewcode-back" href="../k_armed_bandits.html#k_armed_bandits.NormalBandit.pull">[docs]</a>
+    <span class="k">def</span> <span class="nf">pull</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Operates this instance of NormalBandit.</span>
+
+<span class="sd">        A random reward is generated from its defined normal reward distribution,</span>
+<span class="sd">        which may vary depending on the time step t.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        t : int</span>
+<span class="sd">            The current time step.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            A float value representing the reward.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the mean for the current time step t</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+
+        <span class="c1"># Set random seed to None to ignore any previous seed values</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variance</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="BanditsGame">
+<a class="viewcode-back" href="../k_armed_bandits.html#k_armed_bandits.BanditsGame">[docs]</a>
+<span class="k">class</span> <span class="nc">BanditsGame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates an instance of the bandits testbed.</span>
+
+<span class="sd">    Generates K NormalBandit objects to populate the BanditsGame</span>
+
+<span class="sd">    ...</span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    K : int</span>
+<span class="sd">        the number of NormalBandits to populate</span>
+<span class="sd">    verbose : boolean</span>
+<span class="sd">        optional parameter used to provide greater detail to stdout</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    run_greedy(T):</span>
+<span class="sd">        runs an instance of the BanditsGame using the greedy algorithm</span>
+
+<span class="sd">    run_epsilon_greedy(T, epsilon):</span>
+<span class="sd">        runs an instance of the BanditsGame using the epsilon-greedy algorithm</span>
+
+<span class="sd">    run_optimistic_initial_values(T, initial_value):</span>
+<span class="sd">        runs an instance of the BanditsGame using the optimistic-greedy algorithm</span>
+
+<span class="sd">    run_gradient_bandit(T, alpha):</span>
+<span class="sd">        runs an instance of the BanditsGame using the gradient-bandit algorithm</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">non_stationary_type</span><span class="o">=</span><span class="s2">&quot;stationary&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs all the necessary attributes for the BanditsGame object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            K : int</span>
+<span class="sd">                the number of NormalBandit objects to include in the game</span>
+<span class="sd">            seed : int or None</span>
+<span class="sd">                optional parameter used as seed for random number generation</span>
+<span class="sd">            verbose : boolean</span>
+<span class="sd">                optional parameter used to provide greater detail to stdout</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="n">K</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">non_stationary_type</span> <span class="o">=</span> <span class="n">non_stationary_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bandits</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">NormalBandit</span><span class="p">(</span><span class="n">means</span><span class="o">=</span><span class="n">generate_means</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(),</span> <span class="n">T</span><span class="p">,</span> <span class="n">non_stationary_type</span><span class="p">),</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span> 
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+        <span class="p">]</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">non_stationary_type</span> <span class="o">==</span> <span class="s2">&quot;abrupt&quot;</span><span class="p">:</span>
+            <span class="n">bandits</span> <span class="o">=</span> <span class="n">abrupt_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bandits</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimal_action</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">([</span><span class="n">bandit</span><span class="o">.</span><span class="n">means</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">for</span> <span class="n">bandit</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandits</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">)]</span>
+        
+<div class="viewcode-block" id="BanditsGame.run_greedy">
+<a class="viewcode-back" href="../k_armed_bandits.html#k_armed_bandits.BanditsGame.run_greedy">[docs]</a>
+    <span class="k">def</span> <span class="nf">run_greedy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs an instance of the BanditsGame using the greedy algorithm.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        T : int</span>
+<span class="sd">            The number of steps to run the algorithm.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array of rewards obtained at each step.</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array indicating whether the optimal action was chosen at each step.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>  <span class="c1"># Initial action-value estimates</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>  <span class="c1"># Action counts</span>
+        <span class="n">rewards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">optimal_action_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandits</span><span class="p">[</span><span class="n">action</span><span class="p">]</span><span class="o">.</span><span class="n">pull</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">Q</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">reward</span> <span class="o">-</span> <span class="n">Q</span><span class="p">[</span><span class="n">action</span><span class="p">])</span> <span class="o">/</span> <span class="n">N</span><span class="p">[</span><span class="n">action</span><span class="p">]</span>
+            <span class="n">rewards</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">reward</span>
+            <span class="n">optimal_action_counts</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimal_action</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;t=</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">, Action=</span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2">, Reward=</span><span class="si">{</span><span class="n">reward</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, Q=</span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s2">, N=</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">rewards</span><span class="p">,</span> <span class="n">optimal_action_counts</span></div>
+
+
+<div class="viewcode-block" id="BanditsGame.run_epsilon_greedy">
+<a class="viewcode-back" href="../k_armed_bandits.html#k_armed_bandits.BanditsGame.run_epsilon_greedy">[docs]</a>
+    <span class="k">def</span> <span class="nf">run_epsilon_greedy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs an instance of the BanditsGame using the epsilon-greedy algorithm.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        T : int</span>
+<span class="sd">            The number of steps to run the algorithm.</span>
+<span class="sd">        epsilon : float</span>
+<span class="sd">            The probability of exploring a random action.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array of rewards obtained at each step.</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array indicating whether the optimal action was chosen at each step.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>  <span class="c1"># Initial action-value estimates</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>  <span class="c1"># Action counts</span>
+        <span class="n">rewards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">optimal_action_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">:</span>
+                <span class="n">action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandits</span><span class="p">[</span><span class="n">action</span><span class="p">]</span><span class="o">.</span><span class="n">pull</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">Q</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">reward</span> <span class="o">-</span> <span class="n">Q</span><span class="p">[</span><span class="n">action</span><span class="p">])</span> <span class="o">/</span> <span class="n">N</span><span class="p">[</span><span class="n">action</span><span class="p">]</span>
+            <span class="n">rewards</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">reward</span>
+            <span class="n">optimal_action_counts</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimal_action</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;t=</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">, Action=</span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2">, Reward=</span><span class="si">{</span><span class="n">reward</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, Q=</span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s2">, N=</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">rewards</span><span class="p">,</span> <span class="n">optimal_action_counts</span></div>
+
+
+<div class="viewcode-block" id="BanditsGame.run_optimistic_initial_values">
+<a class="viewcode-back" href="../k_armed_bandits.html#k_armed_bandits.BanditsGame.run_optimistic_initial_values">[docs]</a>
+    <span class="k">def</span> <span class="nf">run_optimistic_initial_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">initial_value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs an instance of the BanditsGame using the optimistic-greedy algorithm.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        T : int</span>
+<span class="sd">            The number of steps to run the algorithm.</span>
+<span class="sd">        initial_value : float</span>
+<span class="sd">            The initial optimistic value for all actions.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array of rewards obtained at each step.</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array indicating whether the optimal action was chosen at each step.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">initial_value</span><span class="p">))</span>  <span class="c1"># Optimistic initial values</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>  <span class="c1"># Action counts</span>
+        <span class="n">rewards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">optimal_action_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandits</span><span class="p">[</span><span class="n">action</span><span class="p">]</span><span class="o">.</span><span class="n">pull</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">Q</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">reward</span> <span class="o">-</span> <span class="n">Q</span><span class="p">[</span><span class="n">action</span><span class="p">])</span> <span class="o">/</span> <span class="n">N</span><span class="p">[</span><span class="n">action</span><span class="p">]</span>
+            <span class="n">rewards</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">reward</span>
+            <span class="n">optimal_action_counts</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimal_action</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;t=</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">, Action=</span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2">, Reward=</span><span class="si">{</span><span class="n">reward</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, Q=</span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s2">, N=</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">rewards</span><span class="p">,</span> <span class="n">optimal_action_counts</span></div>
+
+
+<div class="viewcode-block" id="BanditsGame.run_gradient_bandit">
+<a class="viewcode-back" href="../k_armed_bandits.html#k_armed_bandits.BanditsGame.run_gradient_bandit">[docs]</a>
+    <span class="k">def</span> <span class="nf">run_gradient_bandit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs an instance of the BanditsGame using the gradient-bandit algorithm.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        T : int</span>
+<span class="sd">            The number of steps to run the algorithm.</span>
+<span class="sd">        alpha : float</span>
+<span class="sd">            The learning rate for updating preferences.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array of rewards obtained at each step.</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array indicating whether the optimal action was chosen at each step.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>  <span class="c1"># Preferences</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span>  <span class="c1"># Action probabilities</span>
+        <span class="n">rewards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">optimal_action_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandits</span><span class="p">[</span><span class="n">action</span><span class="p">]</span><span class="o">.</span><span class="n">pull</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">average_reward</span> <span class="o">=</span> <span class="n">rewards</span><span class="p">[:</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+            
+            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">action</span><span class="p">:</span>
+                    <span class="n">H</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">+=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">reward</span> <span class="o">-</span> <span class="n">average_reward</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pi</span><span class="p">[</span><span class="n">a</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">H</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">reward</span> <span class="o">-</span> <span class="n">average_reward</span><span class="p">)</span> <span class="o">*</span> <span class="n">pi</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+            
+            <span class="n">pi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">H</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">H</span><span class="p">))</span>
+            <span class="n">rewards</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">reward</span>
+            <span class="n">optimal_action_counts</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimal_action</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;t=</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">, Action=</span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2">, Reward=</span><span class="si">{</span><span class="n">reward</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, H=</span><span class="si">{</span><span class="n">H</span><span class="si">}</span><span class="s2">, pi=</span><span class="si">{</span><span class="n">pi</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">rewards</span><span class="p">,</span> <span class="n">optimal_action_counts</span></div>
+</div>
+
+
+<div class="viewcode-block" id="run_simulation">
+<a class="viewcode-back" href="../k_armed_bandits.html#k_armed_bandits.run_simulation">[docs]</a>
+<span class="k">def</span> <span class="nf">run_simulation</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n_problems</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">non_stationary_type</span><span class="o">=</span><span class="s2">&quot;stationary&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runs multiple instances of the BanditsGame and computes average rewards and optimal action proportions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    K : int</span>
+<span class="sd">        The number of bandits.</span>
+<span class="sd">    T : int</span>
+<span class="sd">        The number of steps to run each game.</span>
+<span class="sd">    n_problems : int</span>
+<span class="sd">        The number of independent problems to simulate.</span>
+<span class="sd">    algorithm : str</span>
+<span class="sd">        The algorithm to use (&#39;greedy&#39;, &#39;epsilon_greedy&#39;, &#39;optimistic_initial_values&#39;, &#39;gradient_bandit&#39;).</span>
+<span class="sd">    seed : int, optional</span>
+<span class="sd">        Random seed for reproducibility (default is None).</span>
+<span class="sd">    non_stationary_type : str, optional</span>
+<span class="sd">        Type of non-stationary behavior (&#39;stationary&#39; or specified in non_stationary_types).</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional parameters specific to the algorithm.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Average rewards across all problems at each step.</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Proportion of times the optimal action was chosen across all problems at each step.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">seed</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">rewards_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_problems</span><span class="p">,</span> <span class="n">T</span><span class="p">))</span>
+    <span class="n">optimal_action_counts_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_problems</span><span class="p">,</span> <span class="n">T</span><span class="p">))</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_problems</span><span class="p">):</span>
+        <span class="n">game</span> <span class="o">=</span> <span class="n">BanditsGame</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="n">non_stationary_type</span><span class="o">=</span><span class="n">non_stationary_type</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;greedy&quot;</span><span class="p">:</span>
+            <span class="n">rewards</span><span class="p">,</span> <span class="n">optimal_action_counts</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">run_greedy</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;epsilon_greedy&quot;</span><span class="p">:</span>
+            <span class="n">rewards</span><span class="p">,</span> <span class="n">optimal_action_counts</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">run_epsilon_greedy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;epsilon&quot;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;optimistic_initial_values&quot;</span><span class="p">:</span>
+            <span class="n">rewards</span><span class="p">,</span> <span class="n">optimal_action_counts</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">run_optimistic_initial_values</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;initial_value&quot;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;gradient_bandit&quot;</span><span class="p">:</span>
+            <span class="n">rewards</span><span class="p">,</span> <span class="n">optimal_action_counts</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">run_gradient_bandit</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">])</span>
+        
+        <span class="n">rewards_all</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">rewards</span>
+        <span class="n">optimal_action_counts_all</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">optimal_action_counts</span>
+    
+    <span class="n">average_rewards</span> <span class="o">=</span> <span class="n">rewards_all</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">rewards_per_trial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rewards_all</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">optimal_action_proportions</span> <span class="o">=</span> <span class="n">optimal_action_counts_all</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">average_rewards</span><span class="p">,</span> <span class="n">optimal_action_proportions</span><span class="p">,</span> <span class="n">rewards_per_trial</span></div>
+
+
+<div class="viewcode-block" id="plot_results">
+<a class="viewcode-back" href="../k_armed_bandits.html#k_armed_bandits.plot_results">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_results</span><span class="p">(</span><span class="n">avg_rewards_greedy</span><span class="p">,</span> <span class="n">avg_rewards_epsilon_greedy</span><span class="p">,</span> <span class="n">avg_rewards_optimistic</span><span class="p">,</span> <span class="n">avg_rewards_gradient</span><span class="p">,</span>
+                 <span class="n">opt_action_props_greedy</span><span class="p">,</span> <span class="n">opt_action_props_epsilon_greedy</span><span class="p">,</span> <span class="n">opt_action_props_optimistic</span><span class="p">,</span> <span class="n">opt_action_props_gradient</span><span class="p">,</span>
+                 <span class="n">best_epsilon</span><span class="p">,</span> <span class="n">best_alpha</span><span class="p">,</span> <span class="n">avg_rewards_per_trial_greedy</span><span class="p">,</span> <span class="n">avg_rewards_per_trial_optimistic</span><span class="p">,</span> 
+                 <span class="n">avg_rewards_per_trial_epsilon_greedy</span><span class="p">,</span> <span class="n">avg_rewards_per_trial_gradient</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots the results of different algorithms.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    avg_rewards_greedy : numpy.ndarray</span>
+<span class="sd">        Average rewards obtained using the greedy algorithm.</span>
+<span class="sd">    avg_rewards_epsilon_greedy : numpy.ndarray</span>
+<span class="sd">        Average rewards obtained using the epsilon-greedy algorithm.</span>
+<span class="sd">    avg_rewards_optimistic : numpy.ndarray</span>
+<span class="sd">        Average rewards obtained using the optimistic initial values algorithm.</span>
+<span class="sd">    avg_rewards_gradient : numpy.ndarray</span>
+<span class="sd">        Average rewards obtained using the gradient bandit algorithm.</span>
+<span class="sd">    opt_action_props_greedy : numpy.ndarray</span>
+<span class="sd">        Proportion of times the optimal action was chosen using the greedy algorithm.</span>
+<span class="sd">    opt_action_props_epsilon_greedy : numpy.ndarray</span>
+<span class="sd">        Proportion of times the optimal action was chosen using the epsilon-greedy algorithm.</span>
+<span class="sd">    opt_action_props_optimistic : numpy.ndarray</span>
+<span class="sd">        Proportion of times the optimal action was chosen using the optimistic initial values algorithm.</span>
+<span class="sd">    opt_action_props_gradient : numpy.ndarray</span>
+<span class="sd">        Proportion of times the optimal action was chosen using the gradient bandit algorithm.</span>
+<span class="sd">    best_epsilon : float</span>
+<span class="sd">        The best epsilon value found during parameter tuning.</span>
+<span class="sd">    best_alpha : float</span>
+<span class="sd">        The best alpha value found during parameter tuning.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Plot average rewards</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">avg_rewards_greedy</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Greedy&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">avg_rewards_epsilon_greedy</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Epsilon-Greedy (ε=</span><span class="si">{</span><span class="n">best_epsilon</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">avg_rewards_optimistic</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Optimistic Initial Values&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">avg_rewards_gradient</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Gradient Bandit (α=</span><span class="si">{</span><span class="n">best_alpha</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Steps&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Average Reward&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Average Reward Comparison&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># Plot % optimal action</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">opt_action_props_greedy</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Greedy&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">opt_action_props_epsilon_greedy</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Epsilon-Greedy (ε=</span><span class="si">{</span><span class="n">best_epsilon</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">opt_action_props_optimistic</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Optimistic Initial Values&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">opt_action_props_gradient</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Gradient Bandit (α=</span><span class="si">{</span><span class="n">best_alpha</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Steps&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;% Optimal Action&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;% Optimal Action Comparison&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># Boxplot of total rewards</span>
+    
+    <span class="n">rewards_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">avg_rewards_per_trial_greedy</span><span class="p">,</span> <span class="n">avg_rewards_per_trial_optimistic</span><span class="p">,</span> 
+                 <span class="n">avg_rewards_per_trial_epsilon_greedy</span><span class="p">,</span> <span class="n">avg_rewards_per_trial_gradient</span><span class="p">]</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Greedy&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Epsilon-Greedy (ε=</span><span class="si">{</span><span class="n">best_epsilon</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;Optimistic Initial Values&#39;</span><span class="p">,</span> 
+            <span class="sa">f</span><span class="s1">&#39;Gradient Bandit (α=</span><span class="si">{</span><span class="n">best_alpha</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">]</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">rewards_data</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Total Rewards&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Boxplot of Total Rewards for Different Algorithms&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Jonathan Kirkpatrick.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

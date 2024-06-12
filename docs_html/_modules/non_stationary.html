@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>non_stationary &mdash; PythonBandits 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PythonBandits
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../k_armed_bandits.html">k_armed_bandits module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../non_stationary.html">non_stationary module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PythonBandits</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">non_stationary</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for non_stationary</h1><div class="highlight"><pre>
+<span></span><span class="c1"># non_stationary.py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="drift_change">
+<a class="viewcode-back" href="../non_stationary.html#non_stationary.drift_change">[docs]</a>
+<span class="k">def</span> <span class="nf">drift_change</span><span class="p">(</span><span class="n">previous_mean</span><span class="p">,</span> <span class="n">initial_mean</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies a small random drift to the mean.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    previous_mean : float</span>
+<span class="sd">        The mean at the previous time step.</span>
+<span class="sd">    initial_mean : float</span>
+<span class="sd">        The initial mean of the bandit.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The updated mean after applying the drift.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">previous_mean</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mean_reverting_change">
+<a class="viewcode-back" href="../non_stationary.html#non_stationary.mean_reverting_change">[docs]</a>
+<span class="k">def</span> <span class="nf">mean_reverting_change</span><span class="p">(</span><span class="n">previous_mean</span><span class="p">,</span> <span class="n">initial_mean</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies a mean-reverting change to the mean.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    previous_mean : float</span>
+<span class="sd">        The mean at the previous time step.</span>
+<span class="sd">    initial_mean : float</span>
+<span class="sd">        The initial mean of the bandit.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The updated mean after applying the mean-reverting change.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">previous_mean</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">initial_mean</span> <span class="o">-</span> <span class="n">previous_mean</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="abrupt_change">
+<a class="viewcode-back" href="../non_stationary.html#non_stationary.abrupt_change">[docs]</a>
+<span class="k">def</span> <span class="nf">abrupt_change</span><span class="p">(</span><span class="n">bandits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Permutes the means corresponding to each bandit.</span>
+
+<span class="sd">    At each time step, with probability 0.005, permutes the means corresponding to each of the reward distributions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bandits : list of NormalBandit</span>
+<span class="sd">        List of bandits whose means need to be permuted.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>    
+    <span class="n">num_bandits</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bandits</span><span class="p">)</span>
+    <span class="n">num_means</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bandits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">means</span><span class="p">)</span>
+    <span class="n">means_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">bandit</span><span class="o">.</span><span class="n">means</span> <span class="k">for</span> <span class="n">bandit</span> <span class="ow">in</span> <span class="n">bandits</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_means</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.005</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">means_matrix</span><span class="p">[:,</span> <span class="n">t</span><span class="p">:])</span>
+
+    <span class="c1"># Update the means for each bandit using the shuffled means_matrix</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">bandit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bandits</span><span class="p">):</span>
+        <span class="n">bandit</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">means_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">bandits</span></div>
+
+
+<div class="viewcode-block" id="generate_means">
+<a class="viewcode-back" href="../non_stationary.html#non_stationary.generate_means">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_means</span><span class="p">(</span><span class="n">initial_mean</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">non_stationary_type</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a sequence of means for the given non-stationary type.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    initial_mean : float</span>
+<span class="sd">        The initial mean of the bandit.</span>
+<span class="sd">    T : int</span>
+<span class="sd">        The number of time steps.</span>
+<span class="sd">    non_stationary_type : str</span>
+<span class="sd">        The type of non-stationary behavior (&#39;drift&#39;, &#39;mean_reverting&#39;, &#39;abrupt&#39;).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        An array of means for each time step.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">means</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_mean</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">non_stationary_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;drift&quot;</span><span class="p">,</span> <span class="s2">&quot;mean_reverting&quot;</span><span class="p">]:</span>
+            <span class="n">means</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">non_stationary_types</span><span class="p">[</span><span class="n">non_stationary_type</span><span class="p">](</span><span class="n">means</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">initial_mean</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">non_stationary_type</span> <span class="o">==</span> <span class="s2">&quot;abrupt&quot;</span><span class="p">:</span>
+            <span class="n">means</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">means</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">means</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">means</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># No change for unrecognized types</span>
+    <span class="k">return</span> <span class="n">means</span></div>
+
+
+<span class="c1"># Dictionary to map non-stationary types to their functions</span>
+<span class="n">non_stationary_types</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;drift&quot;</span><span class="p">:</span> <span class="n">drift_change</span><span class="p">,</span>
+    <span class="s2">&quot;mean_reverting&quot;</span><span class="p">:</span> <span class="n">mean_reverting_change</span><span class="p">,</span>
+    <span class="s2">&quot;abrupt&quot;</span><span class="p">:</span> <span class="n">abrupt_change</span>
+<span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Jonathan Kirkpatrick.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
